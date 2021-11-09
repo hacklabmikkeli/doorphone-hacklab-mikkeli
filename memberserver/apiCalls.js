@@ -38,11 +38,21 @@ module.exports = function () {
     getStatForDay = function (channelID) {
         let channel = client.channels.cache.get(channelID)
         var timestamp = new Date()
+        timestamp.setDate(timestamp.getDate() - 1)
         timestamp = timestamp.toLocaleDateString('fi')
+
+        console.log(timestamp)
         LogModel.find({ "timestamp": { "$regex": timestamp, "$options": "i" } }, (err, docs) => {
-            channel.send(`Users was at Hacklab yesterday: ${docs.length}`).catch((err) => {
-                console.log('err cannot send message')
-            });
+            if (docs.length <= 0) {
+                channel.send(`Please more visitors NOW`).catch((err) => {
+                    console.log('err cannot send message')
+                });
+            } else {
+                channel.send(`${docs.length} User(s) was at Hacklab yesterday `).catch((err) => {
+                    console.log('err cannot send message')
+                });
+            }
+
         })
     }
 
