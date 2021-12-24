@@ -19,19 +19,26 @@ module.exports = function () {
         });
     }
 
-    postToDiscord = function (channelID, name) {
+    postToDiscord = function (channelID, name, access) {
         let channel = client.channels.cache.get(channelID)
-        channel.send(`Could not hold the door... ${name} opened it!`).catch((err) => {
+        let msg = ""
+        if (access) {
+            msg = `Could not hold the door... ${name} opened it!`
+        } else {
+            msg = `I kept the door closed... Someone tried open it...`
+        }
+        channel.send(msg).catch((err) => {
             console.log('err cannot send message')
         });
     }
 
-    createLogEntry = function (name) {
+    createLogEntry = function (name, access) {
         var timestamp = new Date()
         timestamp = timestamp.toLocaleString('fi', { timeZone: 'Europe/Helsinki' })
         var logEntry = new LogModel()
         logEntry.name = name
         logEntry.timestamp = timestamp
+        logEntry.access = access
         logEntry.save().then(() => console.log('Log entry created')).catch((err) => console.log(err))
     }
 
@@ -42,7 +49,7 @@ module.exports = function () {
         timestamp = timestamp.toLocaleDateString('fi')
 
         console.log(timestamp)
-        LogModel.find({ "timestamp": { "$regex": timestamp, "$options": "i" } }, (err, docs) => {
+        LogModel.find({ $and: {"access": true, "timestamp": { "$regex": timestamp, "$options": "i" }} }, (err, docs) => {
             if (docs.length <= 0) {
                 channel.send(`Please more visitors NOW`).catch((err) => {
                     console.log('err cannot send message')

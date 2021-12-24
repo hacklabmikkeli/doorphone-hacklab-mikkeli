@@ -24,10 +24,12 @@ module.exports = function () {
             if (apiKey === config.apiKey) {
                 UserModel.findOne({ phone: req.body.number }, (err, user) => {
                     if (err || !user) {
+                        apiCalls.createLogEntry("Someone: " + req.body.number , false)
+                        apiCalls.postToDiscord(config.channelID, "Someone", false)
                         return res.json({ success: false })
                     }
-                    apiCalls.createLogEntry(user.name)
-                    apiCalls.postToDiscord(config.channelID, user.showName ? user.name : 'Someone')
+                    apiCalls.createLogEntry(user.name, true)
+                    apiCalls.postToDiscord(config.channelID, user.showName ? user.name : 'Someone', true)
                     return res.json({ success: true })
                 });
             }
